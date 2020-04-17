@@ -1,0 +1,136 @@
+LAMMPS (19 Mar 2020)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:94)
+  using 1 OpenMP thread(s) per MPI task
+###############################################################################################################################
+# in.JQ-random - This is an input file for SURF presentation example - Creates a box of random water molocules that move about randomly
+#
+# By: John Quinn
+#
+# Date: 4/17/2020
+#
+# Summary of Code: (General Steps of code)
+#	1. Initializaton
+#
+#	2. System Definiton
+#
+#	3. Simulation Settings
+#
+#	4. Run Simulation
+#
+# Apendix of Commands:
+#	(Command -> commands function ; format( Command arg1 arg 2 . . .) ; more notes)
+#
+# Refrences:
+#	https://data.mendeley.com/datasets/4v53nkv5hc/1#file-d80af488-c3ef-495a-aa6c-da9807e6bf3f
+#
+###############################################################################################################################
+
+variable T  equal  0.23                                                  	# Sets temperature
+variable ew  equal 0.2                                               		# Sets the energy well (epsilon) variable used in the pair coefficient specifications
+variable LD equal  1.0                                                  	# Sets the temperature damping parameter used in fix commands below
+variable P  equal  0.05                                                	 	# Sets the desired pressure of the system used in the following " fix npt" commands
+
+units lj
+
+atom_style atomic
+
+boundary p p p
+
+read_data JQ-Random.data
+  orthogonal box = (0 0 0) to (100 100 100)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  1000 atoms
+  read_data CPU = 0.0045763 secs
+
+mass * 1
+
+group water type 1
+1000 atoms in group water
+
+velocity water create ${T} 87287 loop geom
+velocity water create 0.23 87287 loop geom
+
+pair_style lj/cut 3.6
+
+pair_coeff 1 1 ${ew} 2.7
+pair_coeff 1 1 0.2 2.7
+
+neighbor 1.0 bin
+
+delete_atoms overlap 3.6 water water
+Neighbor list info ...
+  update every 1 steps, delay 10 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 4.6
+  ghost atom cutoff = 4.6
+  binsize = 2.3, bins = 44 44 44
+  2 neighbor lists, perpetual/occasional/extra = 1 1 0
+  (1) command delete_atoms, occasional
+      attributes: full, newton on
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+  (2) pair lj/cut, perpetual
+      attributes: half, newton on
+      pair build: half/bin/atomonly/newton
+      stencil: half/bin/3d/newton
+      bin: standard
+Deleted 92 atoms, new total = 908
+
+timestep .005
+
+fix 1 water npt temp 300.0 300.0 100.0 iso 0.0 0.0 1000.0            		# Applies an NPT ensemble fix to the water group
+
+dump 1 water custom 10 dump.JQ-Random id x y z vx vy vz
+
+run 1000
+Neighbor list info ...
+  update every 1 steps, delay 10 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 4.6
+  ghost atom cutoff = 4.6
+  binsize = 2.3, bins = 44 44 44
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair lj/cut, perpetual
+      attributes: half, newton on
+      pair build: half/bin/atomonly/newton
+      stencil: half/bin/3d/newton
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 4.812 | 4.812 | 4.812 Mbytes
+Step Temp E_pair E_mol TotEng Press Volume 
+       0   0.23232189            0            0   0.34809904 0.00021071595      1000000 
+    1000   0.23364888 -0.007170709            0   0.34291663 0.0002189863      1000000 
+Loop time of 0.262326 on 1 procs for 1000 steps with 908 atoms
+
+Performance: 1646803.999 tau/day, 3812.046 timesteps/s
+95.3% CPU use with 1 MPI tasks x 1 OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.0082101  | 0.0082101  | 0.0082101  |   0.0 |  3.13
+Neigh   | 0.0029908  | 0.0029908  | 0.0029908  |   0.0 |  1.14
+Comm    | 0.0042327  | 0.0042327  | 0.0042327  |   0.0 |  1.61
+Output  | 0.20268    | 0.20268    | 0.20268    |   0.0 | 77.26
+Modify  | 0.037579   | 0.037579   | 0.037579   |   0.0 | 14.33
+Other   |            | 0.006634   |            |       |  2.53
+
+Nlocal:    908 ave 908 max 908 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    253 ave 253 max 253 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    122 ave 122 max 122 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 122
+Ave neighs/atom = 0.134361
+Neighbor list builds = 13
+Dangerous builds = 0
+
+
+
+
+
+
+Total wall time: 0:00:00
